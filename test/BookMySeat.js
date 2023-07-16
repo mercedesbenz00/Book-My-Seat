@@ -1,4 +1,5 @@
 const { expect } = require('chai')
+const { ethers } = require('hardhat')
 
 const NAME = 'BookMySeat'
 const SYMBOL = 'BMS'
@@ -91,6 +92,47 @@ describe("BookMySeat", () => {
             expect(status).to.be.equal(true)
         })
 
-        it('updates seat status')
+        it('updates seat status', async () => {
+            const owner = await bookMySeat.seatTaken(ID, SEAT)
+            expect(owner).to.equal(buyer.address)
+        })
+
+        it('updates overall seating status', async () => {
+            const seats = await bookMySeat.getSeatsTaken(ID)
+            expect(seats.length).to.equal(1)
+            expect(seats[0]).to.equal(SEAT)
+        })
+        
+        it('Updates the contract balance', async () => {
+            const balance = await ethers.provider.getBalance(bookMySeat.getAddress())
+            expect(balance).to.be.equal(AMOUNT)
+        })
+    })
+
+    describe("Withdrawing", () => {
+        const ID = 1
+        const SEAT = 50
+        const AMOUNT = ethers.parseUnits('1.0', 'ether')
+        let balanceBefore
+
+        beforeEach(async () => {
+            balanceBefore = await ethers.provider.getBalance(deployer.address)
+
+            let transaction = await bookMySeat.connect(buyer).mint(ID, SEAT, { value: AMOUNT })
+            await transaction.wait()
+
+            transaction = await bookMySeat.connect(deployer).withdraw()
+            await transaction.wait()
+        })
+
+        it('updates the owner balance', async () => {
+            const balanceAfter = await ethers.provider.getBalance(deployer.address)
+            expect(balanceAfter).to.be.greaterThan(balanceBefore)
+        })
+
+        it('updates the contract balance', async () => {
+            const balance = await ethers.provider.getBalance(bookMySeat.getAddress())
+            expect(balance).to.equal(0)
+        })
     })
 })
