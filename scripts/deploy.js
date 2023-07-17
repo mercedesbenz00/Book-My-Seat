@@ -12,8 +12,9 @@ async function main() {
 
   // console.log(`Deployed BookMySeat Contract at: ${ethers.getSigners()}\n`);
   // Deploy contract
+  const gasPrice = await ethers.parseUnits('20', 'gwei');
   const BookMySeat = await ethers.getContractFactory("BookMySeat");
-  const bookMySeatPromise = BookMySeat.deploy(NAME, SYMBOL);
+  const bookMySeatPromise = BookMySeat.deploy(NAME, SYMBOL, { gasPrice });
   const bookMySeat = await bookMySeatPromise;
   const bookMySeatAddress = await bookMySeat.getAddress();
   
@@ -79,7 +80,9 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+      console.error(error);
+      process.exit(1);
 });

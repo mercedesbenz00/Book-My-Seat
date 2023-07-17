@@ -68,7 +68,7 @@ function App() {
         {occasions && occasions.map((occasion, index) => (
           <Card 
             occasion={occasion}
-            id={index + 1}
+            id={index}
             bookMySeat={bookMySeat}
             provider={provider}
             account={account}
